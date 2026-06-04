@@ -2,8 +2,42 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "진정한 | UI/UX Designer",
-  description: "복잡한 문제를 또렷한 인터페이스로 설계하는 UI/UX 디자이너 진정한의 제품 디자인 포트폴리오",
+  metadataBase: new URL("https://jeonghan.design"),
+  title: {
+    default: "진정한 | UI/UX Designer",
+    template: "%s | 진정한",
+  },
+  description:
+    "복잡한 문제를 또렷한 인터페이스로 설계하는 UI/UX 디자이너 진정한의 제품 디자인 포트폴리오. 금융·헬스케어·커머스 제품의 리서치부터 디자인 시스템까지.",
+  keywords: [
+    "UI 디자이너",
+    "UX 디자이너",
+    "프로덕트 디자이너",
+    "제품 디자인",
+    "디자인 시스템",
+    "포트폴리오",
+    "진정한",
+    "Jeong Han",
+  ],
+  authors: [{ name: "진정한 (Jeong Han)" }],
+  creator: "진정한 (Jeong Han)",
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    siteName: "진정한 — UI/UX Designer",
+    title: "진정한 | UI/UX Designer",
+    description:
+      "복잡한 문제를 또렷한 인터페이스로 설계합니다. 리서치부터 디자인 시스템까지 연결하는 제품 디자인 포트폴리오.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "진정한 | UI/UX Designer",
+    description: "복잡한 문제를 또렷한 인터페이스로 설계합니다.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 type RootLayoutProps = {

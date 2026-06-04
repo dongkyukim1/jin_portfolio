@@ -1,13 +1,27 @@
 "use client";
 
-import { ArrowRight, ArrowUpRight, Mail, Moon, Sun, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Copy,
+  Mail,
+  Menu,
+  Moon,
+  Sun,
+  X,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
+const EMAIL = "hello@jeonghan.design";
 
 const cases = {
   finance: {
     category: "research",
     kicker: "Fintech Onboarding",
     title: "신규 사용자의 첫 송금 여정 리디자인",
+    year: "2025",
+    role_short: "Lead Product Designer",
     summary:
       "복잡한 인증과 계좌 연결 단계를 사용자 의도 중심으로 재배치해 첫 송금까지의 심리적 부담을 줄인 프로젝트입니다.",
     metrics: ["가입 완료율 +28%", "문의 전환 -17%", "8주"],
@@ -23,6 +37,8 @@ const cases = {
     category: "product",
     kicker: "Healthcare Dashboard",
     title: "진료 운영팀을 위한 업무 대시보드",
+    year: "2024",
+    role_short: "Product Designer",
     summary:
       "운영자가 예약 상태, 문진 누락, 후속 안내 대상을 빠르게 판단할 수 있도록 업무 화면을 재구성했습니다.",
     metrics: ["처리시간 -34%", "오류 리포트 -22%", "10주"],
@@ -38,6 +54,8 @@ const cases = {
     category: "system",
     kicker: "Commerce Search",
     title: "검색 결과와 필터 컴포넌트 시스템",
+    year: "2024",
+    role_short: "Design System Lead",
     summary:
       "모바일 검색 경험의 핵심 패턴을 디자인 토큰과 컴포넌트 상태로 정리해 여러 카테고리 화면에 재사용했습니다.",
     metrics: ["검색 전환율 +19%", "UI 제작시간 -31%", "6주"],
@@ -61,6 +79,14 @@ const filters: { label: string; value: Filter }[] = [
   { label: "UI 시스템", value: "system" },
 ];
 
+const navItems: { label: string; id: string }[] = [
+  { label: "Work", id: "work" },
+  { label: "Process", id: "process" },
+  { label: "About", id: "about" },
+  { label: "Skills", id: "capabilities" },
+  { label: "Contact", id: "contact" },
+];
+
 const disciplines = [
   "Product Strategy",
   "User Research",
@@ -68,6 +94,12 @@ const disciplines = [
   "Design System",
   "Prototyping",
   "Usability Testing",
+];
+
+const stats: { value: number; suffix: string; label: string }[] = [
+  { value: 6, suffix: "년", label: "제품 디자인 경험" },
+  { value: 14, suffix: "개", label: "출시 프로젝트" },
+  { value: 3, suffix: "단계", label: "리서치 · 설계 · 검증" },
 ];
 
 const processSteps: [string, string, string][] = [
@@ -88,24 +120,12 @@ const capabilities: { label: string; count: string; items: string[] }[] = [
   {
     label: "Design",
     count: "05",
-    items: [
-      "UI 디자인",
-      "인터랙션 디자인",
-      "디자인 시스템",
-      "프로토타이핑",
-      "정보 구조 설계",
-    ],
+    items: ["UI 디자인", "인터랙션 디자인", "디자인 시스템", "프로토타이핑", "정보 구조 설계"],
   },
   {
     label: "Research",
     count: "05",
-    items: [
-      "사용자 인터뷰",
-      "사용성 테스트",
-      "저니 매핑",
-      "퍼널 · 로그 분석",
-      "A/B 테스트",
-    ],
+    items: ["사용자 인터뷰", "사용성 테스트", "저니 매핑", "퍼널 · 로그 분석", "A/B 테스트"],
   },
   {
     label: "Tools",
@@ -114,15 +134,85 @@ const capabilities: { label: string; count: string; items: string[] }[] = [
   },
 ];
 
+const testimonials: { quote: string; name: string; role: string }[] = [
+  {
+    quote:
+      "복잡한 요구사항을 빠르게 구조로 정리해줘서, 팀 전체의 의사결정 속도가 달라졌습니다.",
+    name: "김지훈",
+    role: "Product Manager",
+  },
+  {
+    quote:
+      "리서치 결과를 화면과 문장으로 번역하는 능력이 탁월합니다. 결과를 지표가 증명했어요.",
+    name: "이서연",
+    role: "Growth Lead",
+  },
+  {
+    quote:
+      "디자인 시스템 덕분에 신규 화면 제작이 몇 배 빨라졌습니다. 협업하기 편한 디자이너예요.",
+    name: "박도현",
+    role: "Frontend Engineer",
+  },
+];
+
 const projects = Object.entries(cases) as [CaseId, (typeof cases)[CaseId]][];
 
 type Theme = "light" | "dark";
+
+function Counter({ value, suffix }: { value: number; suffix: string }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplay(value);
+      return;
+    }
+    let raf = 0;
+    let started = false;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || started) return;
+        started = true;
+        observer.disconnect();
+        const duration = 1100;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setDisplay(Math.round(value * eased));
+          if (p < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      },
+      { threshold: 0.6 },
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [value]);
+
+  return (
+    <span ref={ref}>
+      {display}
+      {suffix}
+    </span>
+  );
+}
 
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState<Filter>("all");
   const [selectedCase, setSelectedCase] = useState<CaseId | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const selected = selectedCase ? cases[selectedCase] : null;
   const visibleProjects = projects.filter(([, project]) => {
@@ -135,25 +225,61 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const updateHeader = () => setIsScrolled(window.scrollY > 8);
-    updateHeader();
-    window.addEventListener("scroll", updateHeader, { passive: true });
-    return () => window.removeEventListener("scroll", updateHeader);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setIsScrolled(y > 8);
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        setScrollProgress(max > 0 ? Math.min(1, y / max) : 0);
+        ticking = false;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   useEffect(() => {
-    document.body.classList.toggle("has-modal", Boolean(selectedCase));
-    return () => document.body.classList.remove("has-modal");
-  }, [selectedCase]);
+    const sections = navItems
+      .map((item) => document.getElementById(item.id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (sections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: 0 },
+    );
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (!selectedCase) return;
+    const lock = Boolean(selectedCase) || menuOpen;
+    document.body.classList.toggle("has-modal", lock);
+    return () => document.body.classList.remove("has-modal");
+  }, [selectedCase, menuOpen]);
+
+  useEffect(() => {
+    if (!selectedCase && !menuOpen) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedCase(null);
+      if (event.key === "Escape") {
+        setSelectedCase(null);
+        setMenuOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectedCase]);
+  }, [selectedCase, menuOpen]);
 
   useEffect(() => {
     if (!document.documentElement.classList.contains("reveal-ready")) return;
@@ -189,8 +315,43 @@ export default function Home() {
     });
   };
 
+  const copyEmail = async () => {
+    const markCopied = () => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    };
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(EMAIL);
+        markCopied();
+        return;
+      }
+    } catch {
+      /* fall back to legacy copy below */
+    }
+    try {
+      const area = document.createElement("textarea");
+      area.value = EMAIL;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      document.body.removeChild(area);
+      markCopied();
+    } catch {
+      /* copy unavailable; no-op */
+    }
+  };
+
   return (
     <>
+      <div
+        className="scroll-progress"
+        style={{ transform: `scaleX(${scrollProgress})` }}
+        aria-hidden="true"
+      />
+
       <a className="skip-link" href="#work">
         작업물로 이동
       </a>
@@ -205,11 +366,16 @@ export default function Home() {
         </a>
         <div className="header-right">
           <nav className="site-nav" aria-label="주요 메뉴">
-            <a href="#work">Work</a>
-            <a href="#process">Process</a>
-            <a href="#about">About</a>
-            <a href="#capabilities">Skills</a>
-            <a href="#contact">Contact</a>
+            {navItems.map((item) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={activeSection === item.id ? "is-current" : ""}
+                aria-current={activeSection === item.id ? "true" : undefined}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
           <button
             className="theme-toggle"
@@ -224,8 +390,47 @@ export default function Home() {
               <Moon size={18} strokeWidth={2.2} aria-hidden="true" />
             )}
           </button>
+          <button
+            className="nav-toggle"
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="메뉴 열기"
+            aria-expanded={menuOpen}
+          >
+            <Menu size={20} strokeWidth={2.2} aria-hidden="true" />
+          </button>
         </div>
       </header>
+
+      {menuOpen ? (
+        <div className="mobile-menu" role="dialog" aria-modal="true" aria-label="메뉴">
+          <button
+            className="mobile-menu-close"
+            type="button"
+            onClick={() => setMenuOpen(false)}
+            aria-label="메뉴 닫기"
+          >
+            <X size={22} strokeWidth={2.2} aria-hidden="true" />
+          </button>
+          <nav className="mobile-nav" aria-label="모바일 메뉴">
+            {navItems.map((item, index) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                <span className="mobile-nav-num">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <a className="mobile-menu-mail" href={`mailto:${EMAIL}`}>
+            {EMAIL}
+          </a>
+        </div>
+      ) : null}
 
       <main id="top">
         <section className="hero" aria-labelledby="hero-title">
@@ -245,7 +450,11 @@ export default function Home() {
             <br />
             <span className="accent">또렷한</span> 인터페이스로.
           </h1>
-          <p className="hero-copy" data-reveal style={{ "--reveal-delay": "80ms" } as React.CSSProperties}>
+          <p
+            className="hero-copy"
+            data-reveal
+            style={{ "--reveal-delay": "80ms" } as React.CSSProperties}
+          >
             사용자의 흐름을 정리하고, 제품이 말해야 할 순간을 선명한 화면으로
             설계합니다. 리서치에서 찾은 불편을 구조와 문장, 디자인 시스템으로
             연결합니다.
@@ -259,7 +468,7 @@ export default function Home() {
               작업 보기
               <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
             </a>
-            <a className="button button-ghost" href="mailto:hello@jeonghan.design">
+            <a className="button button-ghost" href={`mailto:${EMAIL}`}>
               <Mail size={18} strokeWidth={2.4} aria-hidden="true" />
               메일 보내기
             </a>
@@ -271,18 +480,14 @@ export default function Home() {
             data-reveal
             style={{ "--reveal-delay": "200ms" } as React.CSSProperties}
           >
-            <div>
-              <dt>6년</dt>
-              <dd>제품 디자인 경험</dd>
-            </div>
-            <div>
-              <dt>14개</dt>
-              <dd>출시 프로젝트</dd>
-            </div>
-            <div>
-              <dt>3단계</dt>
-              <dd>리서치 · 설계 · 검증</dd>
-            </div>
+            {stats.map((stat) => (
+              <div key={stat.label}>
+                <dt>
+                  <Counter value={stat.value} suffix={stat.suffix} />
+                </dt>
+                <dd>{stat.label}</dd>
+              </div>
+            ))}
           </dl>
         </section>
 
@@ -321,9 +526,7 @@ export default function Home() {
               <li
                 key={id}
                 data-reveal
-                style={
-                  { "--reveal-delay": `${index * 80}ms` } as React.CSSProperties
-                }
+                style={{ "--reveal-delay": `${index * 80}ms` } as React.CSSProperties}
               >
                 <button
                   className="work-row"
@@ -377,9 +580,7 @@ export default function Home() {
               <article
                 key={step}
                 data-reveal
-                style={
-                  { "--reveal-delay": `${index * 80}ms` } as React.CSSProperties
-                }
+                style={{ "--reveal-delay": `${index * 80}ms` } as React.CSSProperties}
               >
                 <span className="process-num">{step}</span>
                 <h3>{title}</h3>
@@ -431,9 +632,7 @@ export default function Home() {
                 className="cap-col"
                 key={group.label}
                 data-reveal
-                style={
-                  { "--reveal-delay": `${index * 90}ms` } as React.CSSProperties
-                }
+                style={{ "--reveal-delay": `${index * 90}ms` } as React.CSSProperties}
               >
                 <h3>
                   {group.label}
@@ -449,22 +648,76 @@ export default function Home() {
           </div>
         </section>
 
+        <section
+          className="section testimonial-section"
+          id="recommendations"
+          aria-labelledby="rec-title"
+        >
+          <div className="section-head" data-reveal>
+            <span className="mono">05 / Recommendations</span>
+            <h2 id="rec-title">함께 일한 사람들의 이야기</h2>
+          </div>
+          <div className="testimonial-grid">
+            {testimonials.map((item, index) => (
+              <figure
+                className="testimonial"
+                key={item.name}
+                data-reveal
+                style={{ "--reveal-delay": `${index * 90}ms` } as React.CSSProperties}
+              >
+                <span className="quote-mark" aria-hidden="true">
+                  &ldquo;
+                </span>
+                <blockquote>{item.quote}</blockquote>
+                <figcaption>
+                  <span className="testimonial-name">{item.name}</span>
+                  <span className="testimonial-role mono">{item.role}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
         <section className="contact-section" id="contact" aria-labelledby="contact-title" data-reveal>
-          <span className="mono">05 / Contact</span>
+          <span className="mono">06 / Contact</span>
           <h2 className="contact-head" id="contact-title">
             좋은 제품의 다음 장면을 함께 만들까요?
           </h2>
-          <a className="contact-mail" href="mailto:hello@jeonghan.design">
-            hello@jeonghan.design
-            <ArrowUpRight size={36} strokeWidth={2.2} aria-hidden="true" />
-          </a>
+          <div className="contact-mail-row">
+            <a className="contact-mail" href={`mailto:${EMAIL}`}>
+              {EMAIL}
+              <ArrowUpRight size={36} strokeWidth={2.2} aria-hidden="true" />
+            </a>
+            <button
+              className="copy-btn"
+              type="button"
+              onClick={copyEmail}
+              aria-label="이메일 주소 복사"
+            >
+              {copied ? (
+                <>
+                  <Check size={15} strokeWidth={2.4} aria-hidden="true" />
+                  복사됨
+                </>
+              ) : (
+                <>
+                  <Copy size={15} strokeWidth={2.2} aria-hidden="true" />
+                  복사
+                </>
+              )}
+            </button>
+          </div>
           <div className="contact-links">
-            <a href="mailto:hello@jeonghan.design">
+            <a href={`mailto:${EMAIL}`}>
               <Mail size={15} strokeWidth={2.2} aria-hidden="true" />
               Email
             </a>
             <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
               LinkedIn
+              <ArrowUpRight size={14} strokeWidth={2.2} aria-hidden="true" />
+            </a>
+            <a href="https://www.behance.net" target="_blank" rel="noreferrer">
+              Behance
               <ArrowUpRight size={14} strokeWidth={2.2} aria-hidden="true" />
             </a>
             <a href="#work">Resume / CV</a>
@@ -480,6 +733,15 @@ export default function Home() {
           <ArrowUpRight size={14} strokeWidth={2.4} aria-hidden="true" />
         </a>
       </footer>
+
+      <div
+        className={`toast ${copied ? "is-visible" : ""}`}
+        role="status"
+        aria-live="polite"
+      >
+        <Check size={15} strokeWidth={2.6} aria-hidden="true" />
+        이메일 주소를 복사했어요
+      </div>
 
       {selected ? (
         <div
@@ -511,7 +773,9 @@ export default function Home() {
               <span />
               <span />
             </div>
-            <p className="dialog-kicker mono">{selected.kicker}</p>
+            <p className="dialog-kicker mono">
+              {selected.kicker} · {selected.year} · {selected.role_short}
+            </p>
             <h2 id="dialog-title">{selected.title}</h2>
             <p className="dialog-summary">{selected.summary}</p>
             <div className="dialog-metrics">
