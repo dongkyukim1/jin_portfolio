@@ -464,13 +464,13 @@ export default function Home() {
             data-reveal
             style={{ "--reveal-delay": "140ms" } as React.CSSProperties}
           >
-            <a className="button button-primary" href="#work">
-              작업 보기
-              <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
-            </a>
             <a className="button button-ghost" href={`mailto:${EMAIL}`}>
               <Mail size={18} strokeWidth={2.4} aria-hidden="true" />
               메일 보내기
+            </a>
+            <a className="button button-primary" href="#work">
+              작업 보기
+              <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
             </a>
           </div>
 
